@@ -82,7 +82,7 @@ jobs:
 
       - name: Commit Timestamp Update
         run: |
-          git checkout main || git checkout -b main
+          git checkout union_demo || git checkout -b union_demo
           git add TIMESTAMP.txt
           git commit -m "Update at $(date '+%Y-%m-%d %H:%M:%S') (UTC+7)" || echo "No changes to commit."
 
@@ -90,7 +90,7 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          branch: union_demo
           force: true
 
       - name: Cleanup
