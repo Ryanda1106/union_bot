@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { ethers } = require("ethers");
 const chains = require('./chains');
-const axios = require("axios")
+const axios = require("axios");
 const abi = chains.utils.abi;
 const sepoliaProvider = chains.testnet.sepolia.provider();
 const explorerSepolia = chains.testnet.sepolia.explorer;
@@ -15,6 +15,11 @@ const contractAddress = "0x5FbE74A283f7954f10AA04C2eDf55578811aeb03";
 const graphqlEndpoint = "https://graphql.union.build/v1/graphql";
 const selectedWallets = global.selectedWallets || [];
 const wallets = selectedWallets;
+
+// Function to generate random delay between 10 and 60 seconds
+function getRandomDelay(min = 10000, max = 60000) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
   const headers = {
@@ -53,7 +58,8 @@ async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
 
     await new Promise(resolve => setTimeout(resolve, intervalMs));
   }
- }
+}
+
 async function checkBalanceAndApproveUSDC(wallet, USDC_ADDRESS, contractAddress) {
   const usdcContract = new ethers.Contract(USDC_ADDRESS, abi.USDC, wallet);
   
@@ -72,18 +78,18 @@ async function checkBalanceAndApproveUSDC(wallet, USDC_ADDRESS, contractAddress)
       const tx = await usdcContract.approve(contractAddress, approveAmount);
       const receipt = await tx.wait();
       console.log(`✅ Approve confirmed: ${explorerSepolia.tx(receipt.hash)}`);
-	  await delay(3000);
+      await delay(3000);
     } catch (err) {
       console.error(`❌ Approve failed:`, err.message);
       return false;
     }
-  } else {
   }
   return true;
 }
+
 async function sepoliaHolesky() {
   for (const w of global.selectedWallets || []) {
-    const { privatekey, name} = w;
+    const { privatekey, name } = w;
     if (!privatekey) {
       console.warn(`⚠️ Skip ${name || "wallet with missing data"}.`);
       continue;
@@ -92,7 +98,7 @@ async function sepoliaHolesky() {
       const wallet = new ethers.Wallet(privatekey, sepoliaProvider);
       const address = wallet.address;
       const addressHex = address.slice(2);
-	  console.log(`🚀 Sending ${global.maxTransaction} Transaction Sepolia → Holesky from ${wallet.address} (${name})`);
+      console.log(`🚀 Sending ${global.maxTransaction} Transaction Sepolia → Holesky from ${wallet.address} (${name})`);
       const shouldProceed = await checkBalanceAndApproveUSDC(wallet, USDC_ADDRESS, contractAddress);
       if (!shouldProceed) continue;
       const contract = new ethers.Contract(contractAddress, abi.UCS03, wallet);
@@ -106,6 +112,11 @@ async function sepoliaHolesky() {
       };
       for (let i = 1; i <= global.maxTransaction; i++) {
         console.log(`🚀 ${name} | Transaction ${i}/${global.maxTransaction}`);
+        // Add random delay before transaction
+        const randomDelay = getRandomDelay();
+        console.log(`${timelog()} | ⏳ Waiting ${randomDelay / 1000} seconds before transaction...`);
+        await delay(randomDelay);
+        
         const timestampNow = Math.floor(Date.now() / 1000);
         const salt = ethers.keccak256(
           ethers.solidityPacked(["address", "uint256"], [wallet.address, timestampNow])
@@ -116,16 +127,17 @@ async function sepoliaHolesky() {
         const tx = await contract.send(channelId, timeoutHeight, timeoutTimestamp, salt, instruction);
         await tx.wait(1);
         console.log(`${timelog()} | ✅ ${name} | Transaction ${i}: ${explorerSepolia.tx(tx.hash)}`);
-		const txHash = tx.hash.startsWith("0x") ? tx.hash : `0x${tx.hash}`;
-		await delay(2000);
-		const packetHash = await pollPacketHash(txHash);
-		console.log(`${timelog()} | ✅ ${name} | Packet Details: ${unionExplorer.tx(packetHash)}`);
+        const txHash = tx.hash.startsWith("0x") ? tx.hash : `0x${tx.hash}`;
+        await delay(2000);
+        const packetHash = await pollPacketHash(txHash);
+        console.log(`${timelog()} | ✅ ${name} | Packet Details: ${unionExplorer.tx(packetHash)}`);
       }
     } catch (err) {
       console.error(`${timelog()} | ❌ ${name} | Error:`, err.message);
     }
   }
 }
+
 async function sepoliaBabylon() {
   for (const w of global.selectedWallets || []) {
     const { privatekey, name, babylonAddress } = w;
@@ -137,7 +149,7 @@ async function sepoliaBabylon() {
       const wallet = new ethers.Wallet(privatekey, sepoliaProvider);
       const sender = wallet.address;
       const senderHex = sender.slice(2);
-	  console.log(`🚀 Sending ${global.maxTransaction} Transaction Sepolia → Babylon from ${wallet.address} (${name})`);
+      console.log(`🚀 Sending ${global.maxTransaction} Transaction Sepolia → Babylon from ${wallet.address} (${name})`);
       const shouldProceed = await checkBalanceAndApproveUSDC(wallet, USDC_ADDRESS, contractAddress);
       if (!shouldProceed) continue;
 
@@ -155,6 +167,11 @@ async function sepoliaBabylon() {
 
       for (let i = 1; i <= global.maxTransaction; i++) {
         console.log(`🚀 ${name} | Transaction ${i}/${global.maxTransaction}`);
+        // Add random delay before transaction
+        const randomDelay = getRandomDelay();
+        console.log(`${timelog()} | ⏳ Waiting ${randomDelay / 1000} seconds before transaction...`);
+        await delay(randomDelay);
+        
         const timestampNow = Math.floor(Date.now() / 1000);
         const salt = ethers.keccak256(
           ethers.solidityPacked(["address", "uint256"], [wallet.address, timestampNow])
@@ -165,17 +182,18 @@ async function sepoliaBabylon() {
         const tx = await contract.send(channelId, timeoutHeight, timeoutTimestamp, salt, instruction);
         await tx.wait(1);
         console.log(`${timelog()} | ✅ ${name} | Transaction ${i}: ${explorerSepolia.tx(tx.hash)}`);
-		const txHash = tx.hash.startsWith("0x") ? tx.hash : `0x${tx.hash}`;
-		await delay(2000);
-		const packetHash = await pollPacketHash(txHash);
-		console.log(`${timelog()} | ✅ ${name} | Packet Details: ${unionExplorer.tx(packetHash)}`);
+        const txHash = tx.hash.startsWith("0x") ? tx.hash : `0x${tx.hash}`;
+        await delay(2000);
+        const packetHash = await pollPacketHash(txHash);
+        console.log(`${timelog()} | ✅ ${name} | Packet Details: ${unionExplorer.tx(packetHash)}`);
       }
     } catch (err) {
       console.error(`${timelog()} | ❌ ${name} | Error:`, err.message);
     }
   }
 }
+
 module.exports = { 
-sepoliaBabylon,
-sepoliaHolesky
+  sepoliaBabylon,
+  sepoliaHolesky
 };
