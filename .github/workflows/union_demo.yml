@@ -1,4 +1,4 @@
-name: Union Demo
+name: Union Bot Demo
 on:
   schedule:
     - cron: '0 */12 * * *'
