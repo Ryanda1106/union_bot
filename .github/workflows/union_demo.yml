@@ -88,7 +88,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: union_demo
-          force: true
 
       - name: Cleanup
         run: rm -f wallet.json union-demo.7z
