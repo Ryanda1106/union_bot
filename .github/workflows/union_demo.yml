@@ -1,7 +1,5 @@
 name: Union Bot Demo
 on:
-  schedule:
-    - cron: '0 */12 * * *'
   workflow_dispatch:
   push:
     paths:
