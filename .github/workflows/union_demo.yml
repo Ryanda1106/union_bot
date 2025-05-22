@@ -77,7 +77,7 @@ jobs:
           git config user.email "$GIT_EMAIL"
           git config user.name "$GIT_NAME"
 
-      - name: Commit Timestamp Update
+      - name: Timestamp Update
         run: |
           git checkout union_demo || git checkout -b union_demo
           git add TIMESTAMP.txt
