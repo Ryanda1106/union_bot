@@ -4,4 +4,4 @@
 
 2️⃣ Sepolia to Babylon
 
-3️⃣ Sepolia to Xion (Under Development)
+3️⃣ Sepolia to Xion (Waiting)
