@@ -1,4 +1,7 @@
-## Note : This bot for public free, you can make changes manually for your use. The full code that supports other chains is not shared for free.
+### Union Auto Transaction Bot, Chain Support?
 
-```node union.js```
-Use case for transaction from Sepolia to Babylon and Sepolia to Holesky.
+1️⃣ Sepolia to Holesky
+
+2️⃣ Sepolia to Babylon
+
+3️⃣ Sepolia to Xion (Waiting)
